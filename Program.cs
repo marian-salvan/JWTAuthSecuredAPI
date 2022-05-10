@@ -1,5 +1,6 @@
 using JWTAuthSecuredAPI;
 using JWTAuthSecuredAPI.Entities;
+using JWTAuthSecuredAPI.Extenstions;
 using JWTAuthSecuredAPI.Interfaces;
 using JWTAuthSecuredAPI.Services;
 using Microsoft.AspNetCore.Identity;
@@ -23,39 +24,13 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-// user management services
-builder.Services.AddIdentityCore<UserEntity>(options =>
-                {
-                    options.Password.RequireNonAlphanumeric = false;
-                    options.Password.RequireDigit = false;
-                    options.Password.RequireUppercase = false;
-                    options.Password.RequiredLength = 4;
-                })
-                .AddRoles<IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddUserManagementServices(builder.Configuration);
 
-builder.Services.TryAddScoped<UserManager<UserEntity>>();
+builder.Services.AddHelperServices();
 
+builder.Services.AddDbServices();
 
-builder.Services.AddAuthentication("Bearer")
-    .AddJwtBearer(options =>
-        {
-            options.TokenValidationParameters = new()
-            {
-                ClockSkew = TimeSpan.Zero,
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = builder.Configuration["Authentication:Issuer"],
-                ValidAudience = builder.Configuration["Authentication:Audience"],
-                IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.ASCII.GetBytes(builder.Configuration["Authentication:TokenSecret"]))
-            };
-        }
-    );
-
-builder.Services.TryAddScoped<ITokenUtilsService, TokenUtilsService>();
-builder.Services.TryAddScoped<IRefreshTokenService, RefreshTokenService>();
+builder.Services.AddValidators();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

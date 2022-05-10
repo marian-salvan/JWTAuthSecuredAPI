@@ -80,7 +80,7 @@ namespace JWTAuthSecuredAPI.Services
 
         public bool ValidateRefreshToken(string refreshToken)
         {
-            TokenValidationParameters validationParameters = new TokenValidationParameters()
+            var validationParameters = new TokenValidationParameters()
             {
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Authentication:RefreshTokenSecret"])),
                 ValidIssuer = _configuration["Authentication:Issuer"],
