@@ -1,6 +1,6 @@
 ﻿using JWTAuthSecured.Core.Constants;
+using JWTAuthSecured.Core.Interfaces;
 using JWTAuthSecured.Data;
-using JWTAuthSecuredAPI.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 

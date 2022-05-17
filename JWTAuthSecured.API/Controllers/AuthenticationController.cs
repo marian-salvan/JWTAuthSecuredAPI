@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
-using JWTAuthSecuredAPI.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using FluentValidation;
@@ -8,7 +7,8 @@ using AutoMapper;
 using JWTAuthSecured.Core.ApiResponses;
 using JWTAuthSecured.Core.ApiRequests;
 using JWTAuthSecured.Core.Constants;
-using JWTAuthSecured.Data.Entities;
+using JWTAuthSecured.Core.Entities;
+using JWTAuthSecured.Core.Interfaces;
 
 namespace JWTAuthSecuredAPI.Controllers
 {

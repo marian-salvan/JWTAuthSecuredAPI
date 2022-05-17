@@ -1,5 +1,5 @@
 ﻿using JWTAuthSecured.Core.Constants;
-using JWTAuthSecured.Data.Entities;
+using JWTAuthSecured.Core.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;

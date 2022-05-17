@@ -1,7 +1,7 @@
-﻿using JWTAuthSecured.Core.Models;
-using JWTAuthSecured.Data.Entities;
+﻿using JWTAuthSecured.Core.Entities;
+using JWTAuthSecured.Core.Models;
 
-namespace JWTAuthSecuredAPI.Interfaces
+namespace JWTAuthSecured.Core.Interfaces
 {
     public interface ITokenUtilsService
     {

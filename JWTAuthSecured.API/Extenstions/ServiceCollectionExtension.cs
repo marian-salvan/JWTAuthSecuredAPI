@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
+using JWTAuthSecured.Core.Entities;
+using JWTAuthSecured.Core.Interfaces;
 using JWTAuthSecured.Data;
-using JWTAuthSecured.Data.Entities;
-using JWTAuthSecuredAPI.Interfaces;
 using JWTAuthSecuredAPI.Profiles;
 using JWTAuthSecuredAPI.Services;
 using JWTAuthSecuredAPI.Validators;

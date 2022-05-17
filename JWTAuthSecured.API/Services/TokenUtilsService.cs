@@ -1,6 +1,6 @@
-﻿using JWTAuthSecured.Core.Models;
-using JWTAuthSecured.Data.Entities;
-using JWTAuthSecuredAPI.Interfaces;
+﻿using JWTAuthSecured.Core.Entities;
+using JWTAuthSecured.Core.Interfaces;
+using JWTAuthSecured.Core.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;

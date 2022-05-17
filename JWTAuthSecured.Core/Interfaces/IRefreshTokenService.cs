@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace JWTAuthSecuredAPI.Interfaces
+namespace JWTAuthSecured.Core.Interfaces
 {
     public interface IRefreshTokenService
     {
