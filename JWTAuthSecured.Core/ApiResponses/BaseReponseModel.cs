@@ -1,4 +1,6 @@
-﻿namespace JWTAuthSecuredAPI.Models
+﻿using JWTAuthSecured.Core.Models;
+
+namespace JWTAuthSecured.Core.ApiResponses
 {
     public class BaseReponseModel
     {

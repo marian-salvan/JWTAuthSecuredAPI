@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace JWTAuthSecuredAPI.Models
+namespace JWTAuthSecured.Core.ApiRequests
 {
     public class LoginRequestModel
     {

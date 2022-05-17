@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using JWTAuthSecuredAPI.Entities;
-using JWTAuthSecuredAPI.Models;
+using JWTAuthSecured.Core.ApiRequests;
+using JWTAuthSecured.Data.Entities;
 
 namespace JWTAuthSecuredAPI.Profiles
 {

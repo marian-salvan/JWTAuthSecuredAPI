@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
-using JWTAuthSecuredAPI.Constants;
-using JWTAuthSecuredAPI.Models;
+using JWTAuthSecured.Core.ApiRequests;
+using JWTAuthSecured.Core.Constants;
 
 namespace JWTAuthSecuredAPI.Validators
 {

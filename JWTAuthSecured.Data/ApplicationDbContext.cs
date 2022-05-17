@@ -1,10 +1,10 @@
-﻿using JWTAuthSecuredAPI.Constants;
-using JWTAuthSecuredAPI.Entities;
+﻿using JWTAuthSecured.Core.Constants;
+using JWTAuthSecured.Data.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace JWTAuthSecuredAPI
+namespace JWTAuthSecured.Data
 {
     public class ApplicationDbContext : IdentityDbContext<UserEntity>
     {

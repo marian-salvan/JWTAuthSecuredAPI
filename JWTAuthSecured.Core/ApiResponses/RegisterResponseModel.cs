@@ -1,4 +1,4 @@
-﻿namespace JWTAuthSecuredAPI.Models
+﻿namespace JWTAuthSecured.Core.ApiResponses
 {
     public class RegisterResponseModel : BaseReponseModel
     {

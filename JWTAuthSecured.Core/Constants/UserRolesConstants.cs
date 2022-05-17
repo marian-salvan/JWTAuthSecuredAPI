@@ -1,4 +1,4 @@
-﻿namespace JWTAuthSecuredAPI.Constants
+﻿namespace JWTAuthSecured.Core.Constants
 {
     public static class UserRolesConstants
     {

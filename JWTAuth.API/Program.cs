@@ -1,14 +1,8 @@
+using JWTAuthSecured.Data;
 using JWTAuthSecuredAPI;
-using JWTAuthSecuredAPI.Entities;
 using JWTAuthSecuredAPI.Extenstions;
-using JWTAuthSecuredAPI.Interfaces;
-using JWTAuthSecuredAPI.Services;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -70,18 +64,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     app.UseDeveloperExceptionPage();
 }
-else
-{
-    app.UseExceptionHandler(appBuilder =>
-    {
-        appBuilder.Run(async context =>
-        {
-            context.Response.StatusCode = 500;
-            await context.Response.WriteAsync("An unexpected fault happened. Try again later.");
-        });
-    });
 
-}
+app.UseExceptionHandler("/error");
 
 app.UseHttpsRedirection();
 

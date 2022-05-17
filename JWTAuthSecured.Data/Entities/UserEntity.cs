@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace JWTAuthSecuredAPI.Entities
+namespace JWTAuthSecured.Data.Entities
 {
     public class UserEntity : IdentityUser
     {
-
     }
 }

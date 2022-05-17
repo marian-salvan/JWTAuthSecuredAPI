@@ -1,5 +1,5 @@
-﻿using JWTAuthSecuredAPI.Constants;
-using JWTAuthSecuredAPI.Entities;
+﻿using JWTAuthSecured.Core.Constants;
+using JWTAuthSecured.Data;
 using JWTAuthSecuredAPI.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +14,6 @@ namespace JWTAuthSecuredAPI.Services
         {
             _applicationDbContext = applicationDbContext ?? throw new ArgumentNullException(nameof(applicationDbContext));
         }
-
 
         public async Task<IdentityUserToken<string>?> GetUserRefreshTokenAsync(string refreshToken)
         {

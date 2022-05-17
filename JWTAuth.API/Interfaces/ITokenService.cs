@@ -1,5 +1,5 @@
-﻿using JWTAuthSecuredAPI.Entities;
-using JWTAuthSecuredAPI.Models;
+﻿using JWTAuthSecured.Core.Models;
+using JWTAuthSecured.Data.Entities;
 
 namespace JWTAuthSecuredAPI.Interfaces
 {

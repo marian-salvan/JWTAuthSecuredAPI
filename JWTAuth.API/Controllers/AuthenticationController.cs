@@ -1,13 +1,14 @@
-﻿using JWTAuthSecuredAPI.Entities;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
-using JWTAuthSecuredAPI.Models;
-using JWTAuthSecuredAPI.Constants;
 using JWTAuthSecuredAPI.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using FluentValidation;
 using AutoMapper;
+using JWTAuthSecured.Core.ApiResponses;
+using JWTAuthSecured.Core.ApiRequests;
+using JWTAuthSecured.Core.Constants;
+using JWTAuthSecured.Data.Entities;
 
 namespace JWTAuthSecuredAPI.Controllers
 {
@@ -16,72 +17,61 @@ namespace JWTAuthSecuredAPI.Controllers
     public class AuthenticationController : ControllerBase
     {
         private readonly UserManager<UserEntity> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly IConfiguration _configuration;
         private readonly ITokenUtilsService _tokenUtilsService;
         private readonly IRefreshTokenService _refreshTokenService;
         private readonly IMapper _mapper;
         private readonly IValidator<RegisterRequestModel> _registerRequestValidator;
+        private readonly IValidator<LoginRequestModel> _loginRequestValidator;
 
-        public AuthenticationController(
-            UserManager<UserEntity> userManager, 
-            RoleManager<IdentityRole> roleManager,
-            IConfiguration configuration,
-            ITokenUtilsService tokenUtilsService,
-            IRefreshTokenService refreshTokenService,
-            IMapper mapper,
-            IValidator<RegisterRequestModel> registerRequestValidator)
+        public AuthenticationController(UserManager<UserEntity> userManager, ITokenUtilsService tokenUtilsService,
+            IRefreshTokenService refreshTokenService, IMapper mapper,
+            IValidator<RegisterRequestModel> registerRequestValidator,
+            IValidator<LoginRequestModel> loginRequestValidator)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
-            _roleManager = roleManager ?? throw new ArgumentNullException(nameof(roleManager));
-            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _tokenUtilsService = tokenUtilsService ?? throw new ArgumentNullException(nameof(tokenUtilsService));
             _refreshTokenService = refreshTokenService ?? throw new ArgumentNullException(nameof(refreshTokenService));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _registerRequestValidator = registerRequestValidator ?? throw new ArgumentNullException(nameof(registerRequestValidator));
+            _loginRequestValidator = loginRequestValidator ?? throw new ArgumentNullException(nameof(loginRequestValidator));
         }
 
         [HttpPost]
         [Route("register")]
         public async Task<IActionResult> RegisterUser([FromBody] RegisterRequestModel registerModel)
         {
-            try
+     
+            var validationResult = await _registerRequestValidator.ValidateAsync(registerModel);
+
+            if (!validationResult.IsValid)
             {
-                var validationResult = await _registerRequestValidator.ValidateAsync(registerModel);
-
-                if (!validationResult.IsValid)
-                {
-                    return BadRequest(new RegisterResponseModel(string.Empty, string.Join(";", validationResult.Errors.Select(x => x.ErrorMessage).ToList())));
-                }
-
-                var userEnity = _mapper.Map<UserEntity>(registerModel);
-
-                var user = await _userManager.FindByEmailAsync(registerModel.Email);
-
-                if (user != null)
-                {
-                    return BadRequest(new RegisterResponseModel(string.Empty, "This user email exists in db"));
-                }
-
-                var creationResult = await _userManager.CreateAsync(userEnity, registerModel.Password);
-
-                if (creationResult.Succeeded)
-                {
-                    var addToRoleResult = await _userManager.AddToRoleAsync(userEnity, registerModel.Role);
-
-                    return addToRoleResult.Succeeded ? 
-                        StatusCode(StatusCodes.Status201Created, new RegisterResponseModel { CreateAccountEmail = registerModel.Email }) :
-                        StatusCode(StatusCodes.Status500InternalServerError, new RegisterResponseModel(string.Empty,
-                            string.Join(";", addToRoleResult.Errors.Select(x => x.Description).ToList())));
-                }
-
-                return StatusCode(StatusCodes.Status500InternalServerError, new RegisterResponseModel(string.Empty, 
-                    string.Join(";", creationResult.Errors.Select(x => x.Description).ToList())));
+                return BadRequest(new RegisterResponseModel(ErrorCodes.InvalidRequest, 
+                    string.Join(";", validationResult.Errors.Select(x => x.ErrorMessage).ToList())));
             }
-            catch (Exception ex)
+
+            var userEnity = _mapper.Map<UserEntity>(registerModel);
+
+            var user = await _userManager.FindByEmailAsync(registerModel.Email);
+
+            if (user != null)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new BaseReponseModel(string.Empty, ex.Message));
+                return BadRequest(new RegisterResponseModel(ErrorCodes.ExistingUserEmail, ErrorMessages.ExistingUserEmail));
             }
+
+            var creationResult = await _userManager.CreateAsync(userEnity, registerModel.Password);
+
+            if (creationResult.Succeeded)
+            {
+                var addToRoleResult = await _userManager.AddToRoleAsync(userEnity, registerModel.Role);
+
+                return addToRoleResult.Succeeded ? 
+                    StatusCode(StatusCodes.Status201Created, new RegisterResponseModel { CreateAccountEmail = registerModel.Email }) :
+                    StatusCode(StatusCodes.Status500InternalServerError, new RegisterResponseModel(string.Empty,
+                        string.Join(";", addToRoleResult.Errors.Select(x => x.Description).ToList())));
+            }
+
+            return StatusCode(StatusCodes.Status500InternalServerError, new RegisterResponseModel(string.Empty, 
+                string.Join(";", creationResult.Errors.Select(x => x.Description).ToList())));
         }
 
         [HttpPost]

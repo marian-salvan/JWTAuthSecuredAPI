@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace JWTAuthSecuredAPI.Migrations
+namespace JWTAuthSecured.Data.Migrations
 {
     public partial class InitialMigration : Migration
     {
@@ -153,6 +153,15 @@ namespace JWTAuthSecuredAPI.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "AspNetRoles",
+                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
+                values: new object[,]
+                {
+                    { "51f27422-5ce1-4041-aa28-295734338f13", "50cecf78-322f-4efc-a769-f43d834f9d4e", "reader", "reader" },
+                    { "8d46a4bc-f78c-4d3e-a0c2-bede89dc26c4", "f163ba2b-feee-4fdd-a49d-1bb2efbc3dd0", "admin", "admin" }
                 });
 
             migrationBuilder.CreateIndex(

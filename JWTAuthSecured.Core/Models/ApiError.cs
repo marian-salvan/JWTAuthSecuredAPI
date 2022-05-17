@@ -1,4 +1,4 @@
-﻿namespace JWTAuthSecuredAPI.Models
+﻿namespace JWTAuthSecured.Core.Models
 {
     public class ApiError
     {
