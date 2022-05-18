@@ -17,23 +17,26 @@ namespace JWTAuthSecuredAPI.Controllers
     public class AuthenticationController : ControllerBase
     {
         private readonly UserManager<UserEntity> _userManager;
-        private readonly ITokenUtilsService _tokenUtilsService;
+        private readonly ITokenHelper _tokenHelper;
         private readonly IRefreshTokenService _refreshTokenService;
         private readonly IMapper _mapper;
         private readonly IValidator<RegisterRequestModel> _registerRequestValidator;
         private readonly IValidator<LoginRequestModel> _loginRequestValidator;
+        private readonly IValidator<RefreshTokenRequestModel> _refreshTokenRequestValidator;
 
-        public AuthenticationController(UserManager<UserEntity> userManager, ITokenUtilsService tokenUtilsService,
+        public AuthenticationController(UserManager<UserEntity> userManager, ITokenHelper tokenHelper,
             IRefreshTokenService refreshTokenService, IMapper mapper,
             IValidator<RegisterRequestModel> registerRequestValidator,
-            IValidator<LoginRequestModel> loginRequestValidator)
+            IValidator<LoginRequestModel> loginRequestValidator,
+            IValidator<RefreshTokenRequestModel> refreshTokenRequestValidator)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
-            _tokenUtilsService = tokenUtilsService ?? throw new ArgumentNullException(nameof(tokenUtilsService));
+            _tokenHelper = tokenHelper ?? throw new ArgumentNullException(nameof(tokenHelper));
             _refreshTokenService = refreshTokenService ?? throw new ArgumentNullException(nameof(refreshTokenService));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _registerRequestValidator = registerRequestValidator ?? throw new ArgumentNullException(nameof(registerRequestValidator));
             _loginRequestValidator = loginRequestValidator ?? throw new ArgumentNullException(nameof(loginRequestValidator));
+            _refreshTokenRequestValidator = refreshTokenRequestValidator ?? throw new ArgumentNullException(nameof(refreshTokenRequestValidator));
         }
 
         [HttpPost]
@@ -45,7 +48,7 @@ namespace JWTAuthSecuredAPI.Controllers
 
             if (!validationResult.IsValid)
             {
-                return BadRequest(new RegisterResponseModel(ErrorCodes.InvalidRequest, 
+                return BadRequest(new BaseReponseModel(ErrorCodes.InvalidRequest, 
                     string.Join(";", validationResult.Errors.Select(x => x.ErrorMessage).ToList())));
             }
 
@@ -55,7 +58,7 @@ namespace JWTAuthSecuredAPI.Controllers
 
             if (user != null)
             {
-                return BadRequest(new RegisterResponseModel(ErrorCodes.ExistingUserEmail, ErrorMessages.ExistingUserEmail));
+                return BadRequest(new BaseReponseModel(ErrorCodes.ExistingUserEmail));
             }
 
             var creationResult = await _userManager.CreateAsync(userEnity, registerModel.Password);
@@ -70,7 +73,7 @@ namespace JWTAuthSecuredAPI.Controllers
                         string.Join(";", addToRoleResult.Errors.Select(x => x.Description).ToList())));
             }
 
-            return StatusCode(StatusCodes.Status500InternalServerError, new RegisterResponseModel(string.Empty, 
+            return StatusCode(StatusCodes.Status500InternalServerError, new BaseReponseModel(string.Empty, 
                 string.Join(";", creationResult.Errors.Select(x => x.Description).ToList())));
         }
 
@@ -78,17 +81,30 @@ namespace JWTAuthSecuredAPI.Controllers
         [Route("login")]
         public async Task<IActionResult> LoginUser([FromBody] LoginRequestModel loginModel)
         {
+            var validationResult = await _loginRequestValidator.ValidateAsync(loginModel);
+
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(new BaseReponseModel(ErrorCodes.InvalidRequest,
+                    string.Join(";", validationResult.Errors.Select(x => x.ErrorMessage).ToList())));
+            }
+
             var user = await _userManager.FindByEmailAsync(loginModel.Email);
 
             if (user != null && await _userManager.CheckPasswordAsync(user, loginModel.Password))
             {
                 var userRoles = await _userManager.GetRolesAsync(user);
 
-                var accessToken = _tokenUtilsService.GenerateAccessToken(user, userRoles.ToList());
-                var refreshToken = _tokenUtilsService.GenerateRefreshToken();
+                var accessToken = _tokenHelper.GenerateAccessToken(user, userRoles.ToList());
+                var refreshToken = _tokenHelper.GenerateRefreshToken();
 
                 //save refresh token
-                await _refreshTokenService.UpsertUserRefreshTokenAsync(user.Id, refreshToken);
+                var saveResult = await _refreshTokenService.UpsertUserRefreshTokenAsync(user.Id, refreshToken);
+
+                if (saveResult < 1)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new BaseReponseModel(ErrorCodes.CouldNotLogIn));
+                }
 
                 return Ok(new AuthenticatedResponseModel
                 {
@@ -98,40 +114,46 @@ namespace JWTAuthSecuredAPI.Controllers
                 });
             }
 
-            return Unauthorized();
+            return Unauthorized(new BaseReponseModel(ErrorCodes.NotAllowed));
         }
 
         [HttpPost("refresh")]
         public async Task<IActionResult> RefreshAccessToken([FromBody] RefreshTokenRequestModel refreshTokenModel)
         {
-            if (!ModelState.IsValid)
+            var validationResult = await _refreshTokenRequestValidator.ValidateAsync(refreshTokenModel);
+
+            if (!validationResult.IsValid)
             {
-                return BadRequest();
+                return BadRequest(new BaseReponseModel(ErrorCodes.InvalidRequest,
+                    string.Join(";", validationResult.Errors.Select(x => x.ErrorMessage).ToList())));
             }
 
-            var validToken = _tokenUtilsService.ValidateRefreshToken(refreshTokenModel.RefreshToken);
+            var validToken = _tokenHelper.ValidateRefreshToken(refreshTokenModel.RefreshToken);
 
             if (!validToken)
             {
-                return Forbid();
+                return StatusCode(StatusCodes.Status403Forbidden, 
+                    new BaseReponseModel(ErrorCodes.CouldNotValidateRefreshToken));
             }
 
             var savedToken = await _refreshTokenService.GetUserRefreshTokenAsync(refreshTokenModel.RefreshToken);
 
             if (savedToken == null)
             {
-                return Forbid();
+                return StatusCode(StatusCodes.Status403Forbidden,
+                                  new BaseReponseModel(ErrorCodes.CouldNotFindRefreshToken));
             }
 
             var user = await _userManager.FindByIdAsync(savedToken.UserId);
+
             if (user == null)
             {
-                return Forbid();
+                return StatusCode(StatusCodes.Status403Forbidden,
+                                  new BaseReponseModel(ErrorCodes.CouldNotFindUser));
             }
 
             var userRoles = await _userManager.GetRolesAsync(user);
-            var newAccessToken = _tokenUtilsService.GenerateAccessToken(user, userRoles.ToList());
-;
+            var newAccessToken = _tokenHelper.GenerateAccessToken(user, userRoles.ToList());
 
             return Ok(new AccessTokenResposnse
             {
@@ -146,13 +168,19 @@ namespace JWTAuthSecuredAPI.Controllers
         public async Task<IActionResult> Revoke()
         {
             var email = HttpContext.User.FindFirstValue(ClaimTypes.Email);
+
+            if (email == null) return StatusCode(StatusCodes.Status403Forbidden, 
+                new BaseReponseModel(ErrorCodes.MustBeLoggedIn));
+
             var user = await _userManager.FindByEmailAsync(email);
 
-            if (user == null) return BadRequest("Invalid user email");
+            if (user == null) return BadRequest(new BaseReponseModel(ErrorCodes.InvalidEmailAddress));
 
-            await _refreshTokenService.RemoveUserRefreshTokenAsync(user.Id);
+            var removeResult = await _refreshTokenService.RemoveUserRefreshTokenAsync(user.Id);
 
-            return NoContent();
+            return removeResult > 0 ? StatusCode(StatusCodes.Status204NoContent, new BaseReponseModel()) :
+                                      StatusCode(StatusCodes.Status500InternalServerError,
+                                        new BaseReponseModel(ErrorCodes.CouldNotRevokeToken));
         }
     }
 }

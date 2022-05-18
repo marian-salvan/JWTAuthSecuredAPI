@@ -1,4 +1,5 @@
-﻿using JWTAuthSecured.Core.Models;
+﻿using JWTAuthSecured.Core.Constants;
+using JWTAuthSecured.Core.Models;
 
 namespace JWTAuthSecured.Core.ApiResponses
 {
@@ -13,9 +14,15 @@ namespace JWTAuthSecured.Core.ApiResponses
             ApiError = null;
         }
 
-        public BaseReponseModel(string errorCode, string errorMessage)
+        public BaseReponseModel(string errorCode)
         {
-            ApiError = new ApiError { Code = errorCode, Message = errorMessage };
+            ApiError = new ApiError { Code = errorCode, Message = ErrorMessages.GetErrorMessage(errorCode) };
+            Success = false;
+        }
+
+        public BaseReponseModel(string errorCode, string customErrorMessage)
+        {
+            ApiError = new ApiError { Code = errorCode, Message = customErrorMessage };
             Success = false;
         }
     }

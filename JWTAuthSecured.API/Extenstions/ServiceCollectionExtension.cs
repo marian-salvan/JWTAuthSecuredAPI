@@ -2,6 +2,7 @@
 using JWTAuthSecured.Core.Entities;
 using JWTAuthSecured.Core.Interfaces;
 using JWTAuthSecured.Data;
+using JWTAuthSecuredAPI.Helpers;
 using JWTAuthSecuredAPI.Profiles;
 using JWTAuthSecuredAPI.Services;
 using JWTAuthSecuredAPI.Validators;
@@ -21,7 +22,7 @@ namespace JWTAuthSecuredAPI.Extenstions
 
         public static void AddHelperServices(this IServiceCollection services)
         {
-            services.TryAddScoped<ITokenUtilsService, TokenUtilsService>();
+            services.TryAddScoped<ITokenHelper, TokenHelper>();
             services.AddAutoMapper(typeof(AutoMapperProfile));
         }
 

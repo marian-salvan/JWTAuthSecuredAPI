@@ -1,18 +1,19 @@
 ﻿using JWTAuthSecured.Core.Entities;
 using JWTAuthSecured.Core.Interfaces;
 using JWTAuthSecured.Core.Models;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace JWTAuthSecuredAPI.Services
+namespace JWTAuthSecuredAPI.Helpers
 {
-    public class TokenUtilsService : ITokenUtilsService
+    public class TokenHelper : ITokenHelper
     {
         private readonly IConfiguration _configuration;
 
-        public TokenUtilsService(IConfiguration configuration)
+        public TokenHelper(IConfiguration configuration)
         {
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
@@ -37,7 +38,7 @@ namespace JWTAuthSecuredAPI.Services
                 claimsForToken.Add(new Claim(ClaimTypes.Role, userRole));
             }
 
-            var expirationDate = DateTime.UtcNow.AddSeconds(30);
+            var expirationDate = DateTime.UtcNow.AddSeconds(60);
 
             var jwtSecurityToken = new JwtSecurityToken(
                           _configuration["Authentication:Issuer"],
@@ -92,16 +93,9 @@ namespace JWTAuthSecuredAPI.Services
             };
 
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+            var result = tokenHandler.ValidateToken(refreshToken, validationParameters, out _);
 
-            try
-            {
-                tokenHandler.ValidateToken(refreshToken, validationParameters, out SecurityToken validatedToken);
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+            return result != null;
         }
     }
 }
