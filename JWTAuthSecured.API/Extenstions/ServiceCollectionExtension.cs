@@ -6,6 +6,7 @@ using JWTAuthSecuredAPI.Helpers;
 using JWTAuthSecuredAPI.Profiles;
 using JWTAuthSecuredAPI.Services;
 using JWTAuthSecuredAPI.Validators;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
@@ -40,7 +41,7 @@ namespace JWTAuthSecuredAPI.Extenstions
 
             services.TryAddScoped<UserManager<UserEntity>>();
 
-            services.AddAuthentication("Bearer")
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
                     options.TokenValidationParameters = new()

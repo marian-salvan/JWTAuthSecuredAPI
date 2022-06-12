@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32328.378
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JWTAuthSecured.API", "JWTAuthSecured.API.csproj", "{62935352-4019-452C-A75D-A6ECCA789F58}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JWTAuthSecured.API", "JWTAuthSecured.API\JWTAuthSecured.API.csproj", "{62935352-4019-452C-A75D-A6ECCA789F58}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JWTAuthSecured.Core", "..\JWTAuthSecured.Core\JWTAuthSecured.Core.csproj", "{004DC1CA-E363-4EA9-A016-1327BFC41983}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JWTAuthSecured.Core", "JWTAuthSecured.Core\JWTAuthSecured.Core.csproj", "{004DC1CA-E363-4EA9-A016-1327BFC41983}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JWTAuthSecured.Data", "..\JWTAuthSecured.Data\JWTAuthSecured.Data.csproj", "{23F53669-235C-4412-AF91-D903ABE1BACE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JWTAuthSecured.Data", "JWTAuthSecured.Data\JWTAuthSecured.Data.csproj", "{23F53669-235C-4412-AF91-D903ABE1BACE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
